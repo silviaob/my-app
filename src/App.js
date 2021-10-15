@@ -1,22 +1,41 @@
 import React, { useEffect, useState } from "react";
+import { api } from "./api";
 
 function App() {
-  const [pokemonList, setPokemonList] = useState();
+  const [pokemonList, setPokemonList] = useState([]);
+  const [inputList, setInputList] = useState("");
+
+  const fechPokemons = async () => {
+    const listPokemons10 = await api.allPokemons();
+    setPokemonList(listPokemons10.results);
+  };
+
+  const fechPokemonDetail = async (url) => {
+    console.log(url);
+    console.log(await api.pokemonDetail(url));
+  };
+
   useEffect(() => {
-    // GET request using fetch inside useEffect React hook
-    fetch("https://pokeapi.co/api/v2/pokemon?limit=10&offset=1")
-      .then((response) => response.json())
-      .then((data) => {
-        setPokemonList(data.results);
-      });
+    fechPokemons();
+
+    pokemonList.map((pokemon) => fechPokemonDetail(pokemon.url));
   }, []);
 
-  const listItems = pokemonList.map((item) => <li>{item.name}</li>);
+  console.log(pokemonList);
+
+  const filterPokemons = pokemonList
+    .filter((pokemon) =>
+      pokemon.name.toLowerCase().includes(inputList.toLowerCase())
+    )
+    .map((item) => <li>{item.name}</li>);
 
   return (
     <>
-      <input type="text" id="fname" name="fname" value="John" readonly></input>
-      <ul>{listItems}</ul>
+      <input
+        onChange={(event) => setInputList(event.target.value)}
+        value={inputList}
+      ></input>
+      <ul>{filterPokemons}</ul>
     </>
   );
 }
